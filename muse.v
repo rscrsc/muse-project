@@ -8,23 +8,21 @@ module muse(
     output [7:0] hdmiOutput
 );
 
-// Generate a test pattern
-// change screen bg color per 1s
-reg [24:0] divCounter25M;
-always @(posedge oscClk) begin
-    divCounter25M <= (divCounter25M == 25'd25000000) ? 25'd0
-        : divCounter25M+25'd1;
-end
+//reg [24:0] clk_1Hz;
+//always @(posedge oscClk) begin
+//    clk_1Hz <= (clk_1Hz == 25'd25000000) ? 25'd0
+//        : clk_1Hz+25'd1;
+//end
 
-reg colorState;
-always @(posedge oscClk) begin
-    colorState <= (divCounter25M) ? colorState : (~colorState);
-end
-
+wire [9:0] hdmiScreenX, hdmiScreenY;
+wire square;
 reg [23:0] bgColor;
 always @(posedge oscClk) begin
-    bgColor <= (colorState) ? {{8{1'b1}},{16{1'b0}}} 
-        : {{16{1'b0}}, {8{1'b1}}};
+    square <= (hdmiScreenX > 220 && hdmiScreenX < 420) && (hdmiScreenY > 140 && hdmiScreenY < 340);
+end
+always @(posedge oscClk) begin
+    bgColor <= {(square)? 4'hf:4'h1, (square)? 4'hf:4'h3, 
+        (square)? 4'hf:4'h5};
 end
 
 wire hdmiClk_25M, hdmiClk_250M;
@@ -44,7 +42,9 @@ hdmiController hdmiCtrl(
     .tmdsPos(hdmiOutput[7:5]),
     .tmdsPosClk(hdmiOutput[4]),
     .tmdsNeg(hdmiOutput[3:1]),
-    .tmdsNegClk(hdmiOutput[0])
+    .tmdsNegClk(hdmiOutput[0]),
+    .screenX(hdmiScreenX),
+    .screenY(hdmiScreenY)
 );
 
 endmodule

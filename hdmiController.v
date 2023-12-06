@@ -9,6 +9,8 @@ module hdmiController(
     output [2:0]tmdsNeg,
     output tmdsPosClk,
     output tmdsNegClk,
+    output [9:0] screenX,
+    output [9:0] screenY
     );
 
     // horizontal timings
@@ -27,6 +29,8 @@ module hdmiController(
     reg [9:0] screenPosX, screenPosY;
     reg hSync, vSync, drawArea;
 
+    assign screenX = screenPosX;
+    assign screenY = screenPosY;
     // Control screenPos now
     always @(posedge pixelClk)
     if (~reset)
